@@ -6,14 +6,14 @@ const Post = mongoose.model("Post")
 
 router.get('/allpost',(req,res)=>{
     Post.find()
-    .populate("postedby","_id name")
+    .populate("postedby","_id name pic")
     .populate("comments.postedby","_id name")
     .then(posts=>{res.json({posts})})
     .catch(err=>{console.log(err)});
 })
 router.get('/mypost',requirelogin,(req,res)=>{
     Post.find({postedby:req.user._id})
-    .populate("postedby","_id name")
+    .populate("postedby","_id name pic")
     .then(mypost=>{res.json({mypost})})
     .catch(err=>{console.log(err)});
 })
@@ -40,7 +40,7 @@ router.post('/createpost',requirelogin,(req,res)=>{
 router.put('/likes',requirelogin,(req,res)=>{
     Post.findByIdAndUpdate(req.body.postId,
         {$push:{likes:req.user._id}},
-        {new:true}).populate("comments.postedby","_id name")
+        {new:true}).populate("postedby","_id name pic").populate("comments.postedby","_id name pic")
         .exec((err,result)=>{
             if(err){
                 return res.status(422).json({error:err});
@@ -53,7 +53,7 @@ router.put('/likes',requirelogin,(req,res)=>{
 router.put('/dislikes',requirelogin,(req,res)=>{
     Post.findByIdAndUpdate(req.body.postId,
         {$pull:{likes:req.user._id}},
-        {new:true}).populate("comments.postedby","_id name")
+        {new:true}).populate("postedby","_id name pic").populate("comments.postedby","_id name pic")
         .exec((err,result)=>{
             if(err){
                 return res.status(422).json({error:err});
@@ -70,8 +70,8 @@ router.put('/comments',requirelogin,(req,res)=>{
     }
     Post.findByIdAndUpdate(req.body.postId,
         {$push:{comments:comment}},
-        {new:true}).populate("comments.postedby","_id name")
-        .populate("postedby","_id name")
+        {new:true}).populate("comments.postedby","_id name pic")
+        .populate("postedby","_id name pic")
         .exec((err,result)=>{
             if(err){
                 return res.status(422).json({error:err});
